@@ -1,63 +1,13 @@
 import { Tabs, useRouter } from "expo-router";
 import { Home, Calculator, AlertTriangle, ClipboardList, BookOpen } from "lucide-react-native";
-import React, { useRef, useCallback } from "react";
-import { View, Pressable, Text, StyleSheet, Animated, Platform } from "react-native";
-import * as Haptics from "expo-haptics";
+import React from "react";
+import { View } from "react-native";
 import Colors from "@/constants/colors";
-
-function FloatingEmergencyButton() {
-  const router = useRouter();
-  const scale = useRef(new Animated.Value(1)).current;
-  const pulse = useRef(new Animated.Value(1)).current;
-
-  React.useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.08, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1.0, duration: 900, useNativeDriver: true }),
-      ])
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [pulse]);
-
-  const handlePressIn = useCallback(() => {
-    Animated.spring(scale, { toValue: 0.92, useNativeDriver: true }).start();
-  }, [scale]);
-
-  const handlePressOut = useCallback(() => {
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
-  }, [scale]);
-
-  const handlePress = useCallback(() => {
-    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    router.push("/(tabs)/(crisis)");
-  }, [router]);
-
-  return (
-    <View style={styles.fabContainer} pointerEvents="box-none">
-      <Animated.View style={[styles.fabPulse, { transform: [{ scale: pulse }] }]} />
-      <Animated.View style={{ transform: [{ scale }] }}>
-        <Pressable
-          style={styles.fab}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          onPress={handlePress}
-          accessibilityLabel="Emergency Protocols"
-          accessibilityHint="Opens crisis protocol list"
-        >
-          <AlertTriangle size={20} color={Colors.textInverse} />
-          <Text style={styles.fabText}>SOS</Text>
-        </Pressable>
-      </Animated.View>
-    </View>
-  );
-}
-
 export default function TabLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
+        initialRouteName="(home)"
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: Colors.accent,
@@ -90,15 +40,14 @@ export default function TabLayout() {
         <Tabs.Screen
           name="(crisis)"
           options={{
-            title: "Crisis",
-            tabBarIcon: ({ color, size }) => <AlertTriangle color={color} size={size} />,
-            tabBarBadge: "",
-            tabBarBadgeStyle: {
-              backgroundColor: Colors.emergency,
-              minWidth: 8,
-              maxHeight: 8,
-              borderRadius: 4,
-              top: 6,
+            title: "SOS",
+            tabBarIcon: ({ size }) => <AlertTriangle color="#FF2D2D" size={size} />,
+            tabBarActiveTintColor: "#FF2D2D",
+            tabBarInactiveTintColor: "#FF2D2D",
+            tabBarLabelStyle: {
+              fontSize: 11,
+              fontWeight: "800" as const,
+              color: "#FF2D2D",
             },
           }}
         />
@@ -117,46 +66,7 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-      <FloatingEmergencyButton />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  fabContainer: {
-    position: "absolute",
-    bottom: 88,
-    right: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 999,
-  },
-  fabPulse: {
-    position: "absolute",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.emergency,
-    opacity: 0.25,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.emergency,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: Colors.emergency,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 8,
-    gap: 1,
-  },
-  fabText: {
-    color: Colors.textInverse,
-    fontSize: 9,
-    fontWeight: "900" as const,
-    letterSpacing: 0.5,
-  },
-});
