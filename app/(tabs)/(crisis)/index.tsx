@@ -1,7 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Animated, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Flame, ShieldAlert, Wind, Droplets, AlertTriangle, Syringe, Phone } from 'lucide-react-native';
+import { Flame, ShieldAlert, Wind, Droplets, AlertTriangle, Syringe, Phone, Zap, HeartPulse } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { crisisProtocols } from '@/mocks/crisisProtocols';
@@ -13,6 +13,8 @@ const iconMap: Record<string, React.ComponentType<{ size: number; color: string 
   Wind,
   Droplets,
   AlertTriangle,
+  Zap,
+  HeartPulse,
 };
 
 function CrisisCard({ id, title, subtitle, color, icon, onPress }: {

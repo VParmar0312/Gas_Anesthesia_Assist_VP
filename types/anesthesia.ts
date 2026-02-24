@@ -65,6 +65,10 @@ export interface Drug {
   duration: string;
   notes: string;
   maxDose?: string;
+  mechanism?: string;
+  contraindications?: string;
+  interactions?: string;
+  pediatricDose?: string;
 }
 
 export interface CrisisProtocol {
