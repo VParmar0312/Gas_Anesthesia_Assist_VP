@@ -1,5 +1,9 @@
 # Gas: Anesthesia Assist
 
+EDUCATIONAL USE ONLY — NOT MEDICAL ADVICE
+
+AnesthAssist is an educational reference tool for anesthesia students, residents, and trainees. All content is for learning purposes only. This app does not provide patient-specific medical advice, diagnosis, or treatment recommendations. Always consult qualified clinical supervision and institutional protocols for actual patient care decisions. Do not use this app to make real-time clinical decisions.
+
 AnesthAssist is the clinical companion designed for anesthesiologists, CRNAs, and anesthesia residents who demand accuracy and speed at the point of care.
 
 DRUG REFERENCE
