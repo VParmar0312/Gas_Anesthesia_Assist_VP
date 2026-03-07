@@ -369,6 +369,13 @@ export default function CalculatorsScreen() {
       {activeTab === 'blood' && renderBloodCalc()}
       {activeTab === 'local' && renderLocalCalc()}
 
+      <View style={styles.footnoteContainer}>
+        <Text style={styles.footnoteText}>
+          Reference values only. Verify all calculations against package inserts and institutional
+          protocols before clinical use. Not for patient dosing decisions.
+        </Text>
+      </View>
+
       <View style={styles.bottomSpacer} />
     </ScrollView>
   );
@@ -586,5 +593,18 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 20,
+  },
+  footnoteContainer: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  footnoteText: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    lineHeight: 16,
+    textAlign: 'center' as const,
+    fontStyle: 'italic' as const,
   },
 });

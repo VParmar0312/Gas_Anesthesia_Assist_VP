@@ -158,6 +158,13 @@ export default function ReferencesScreen() {
           </>
         )}
 
+        <View style={styles.refDisclaimer}>
+          <Text style={styles.refDisclaimerText}>
+            For educational reference only. Drug doses and ASRA guidelines are subject to change.
+            Always verify against current package inserts and society guidelines before clinical use.
+          </Text>
+        </View>
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </View>
@@ -365,5 +372,18 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 20,
+  },
+  refDisclaimer: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  refDisclaimerText: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    lineHeight: 16,
+    textAlign: 'center' as const,
+    fontStyle: 'italic' as const,
   },
 });
