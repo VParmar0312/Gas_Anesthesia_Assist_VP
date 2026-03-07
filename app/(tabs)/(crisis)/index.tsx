@@ -85,6 +85,13 @@ export default function CrisisScreen() {
         </View>
       </View>
 
+      <View style={styles.institutionalNote}>
+        <Text style={styles.institutionalNoteText}>
+          Educational reference only. Adapt to your institution's protocols and current evidence.
+          Not a substitute for clinical judgment.
+        </Text>
+      </View>
+
       {crisisProtocols.map((protocol) => (
         <CrisisCard
           key={protocol.id}
@@ -196,5 +203,20 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 20,
+  },
+  institutionalNote: {
+    backgroundColor: Colors.card,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  institutionalNoteText: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    lineHeight: 16,
+    textAlign: 'center' as const,
+    fontStyle: 'italic' as const,
   },
 });

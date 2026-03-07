@@ -65,6 +65,13 @@ export default function ProtocolDetailScreen() {
           <Text style={styles.headerSubtitle}>{protocol.subtitle}</Text>
         </View>
 
+        <View style={styles.protocolAdvisory}>
+          <Text style={styles.protocolAdvisoryText}>
+            Educational reference only. Adapt to your institution's protocols and verify with
+            current guidelines before clinical use.
+          </Text>
+        </View>
+
         {isMH && (
           <View style={styles.dantroleneCard}>
             <Text style={styles.dantroleneTitle}>Dantrolene Calculator</Text>
@@ -309,5 +316,20 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 20,
+  },
+  protocolAdvisory: {
+    backgroundColor: Colors.card,
+    borderRadius: 10,
+    padding: 11,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  protocolAdvisoryText: {
+    fontSize: 11,
+    color: Colors.textTertiary,
+    lineHeight: 16,
+    textAlign: 'center' as const,
+    fontStyle: 'italic' as const,
   },
 });
