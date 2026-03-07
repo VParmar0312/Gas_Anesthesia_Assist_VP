@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.rork.anesthassist-medical-suite"
+      "bundleIdentifier": "app.anesthassist-medical-suite"
     },
     "android": {
       "adaptiveIcon": {
