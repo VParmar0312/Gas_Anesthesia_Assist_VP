@@ -1,3 +1,4 @@
+import { Progress, Panel } from "../../../components/ui/clinical";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import {
@@ -40,6 +41,18 @@ export default function Cases() {
         disabled={!loaded || !!error}
         onPress={() => router.push("/(tabs)/cases/new-case")}
       />
+      <Panel
+        title={`${loaded && !error ? data.length : "—"} recorded cases`}
+        subtitle="Personal experience · not an official program log"
+        tone="green"
+        icon="progress"
+      >
+        <Button
+          title="Export, import & backups"
+          subtle
+          onPress={() => router.push("/about")}
+        />
+      </Panel>
       <Notice>
         US ACGME minimum experiences, effective July 2026. Program verification
         is required. This is not the official ACGME log or a competency score.
@@ -50,10 +63,12 @@ export default function Cases() {
       <Accordion title="Experience progress & requirements">
         {requirements.map((r) => (
           <Card key={r.id}>
-            <Txt bold>{r.title}</Txt>
-            <Txt>
-              {r.completed} / {r.minimum}
-            </Txt>
+            <Progress
+              label={r.title}
+              value={r.completed}
+              total={r.minimum}
+              tone="purple"
+            />
           </Card>
         ))}
         <Txt muted>

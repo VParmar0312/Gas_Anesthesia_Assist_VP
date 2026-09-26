@@ -80,6 +80,16 @@ export default function Tool() {
           }
         }}
       />
+      <Button
+        title="Reset inputs"
+        subtle
+        onPress={() => {
+          setValues({});
+          setResults([]);
+          setError("");
+          setConfirmed(false);
+        }}
+      />
       {error && <Notice error>{error}</Notice>}
       {results.map((r) => (
         <Result key={r.label} {...r} />

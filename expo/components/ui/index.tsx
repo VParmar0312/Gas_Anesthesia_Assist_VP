@@ -8,35 +8,14 @@ import {
   useColorScheme,
   StyleSheet,
   Linking,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useStore, preferencesStore } from "../../services/data";
 import { sources, reviewStatus, contentVersion } from "../../content/sources";
-const palettes = {
-  dark: {
-    bg: "#10171C",
-    surface: "#1C282F",
-    text: "#F4F6F6",
-    muted: "#B6C6CD",
-    line: "#46575F",
-    accent: "#83DFCA",
-    onAccent: "#062D27",
-    danger: "#FFB4AA",
-    warning: "#FFD999",
-  },
-  light: {
-    bg: "#F6F8F7",
-    surface: "#FFFFFF",
-    text: "#182A31",
-    muted: "#52656D",
-    line: "#CAD5D6",
-    accent: "#076C5D",
-    onAccent: "#FFFFFF",
-    danger: "#AB302B",
-    warning: "#835400",
-  },
-};
+import { palettes, metrics, Tone } from "../../constants/theme";
 export function useTheme() {
   const { data } = useStore(preferencesStore);
   const system = useColorScheme();
@@ -91,42 +70,83 @@ export function Screen({
       edges={["top", "left", "right"]}
       style={{ flex: 1, backgroundColor: t.bg }}
     >
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={s.screen}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {back && (
-          <Button
-            title="‹ Back"
-            onPress={() =>
-              router.canGoBack() ? router.back() : router.replace("/")
-            }
-            subtle
-          />
-        )}
-        <Text
-          accessibilityRole="header"
-          style={{
-            fontSize: 30,
-            lineHeight: 38,
-            color: t.text,
-            fontWeight: "700",
-            letterSpacing: -0.7,
-          }}
+        <ScrollView
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={s.screen}
         >
-          {title}
-        </Text>
-        {subtitle && <Txt muted>{subtitle}</Txt>}
-        {children}
-        <View style={{ height: 24 }} />
-      </ScrollView>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <Text
+              style={{
+                color: t.accent,
+                fontSize: 13,
+                fontWeight: "800",
+                letterSpacing: 3,
+              }}
+            >
+              GAS / COMPANION
+            </Text>
+            {back && (
+              <Button
+                title="Crisis"
+                danger
+                onPress={() => router.push("/(tabs)/crisis")}
+              />
+            )}
+          </View>
+          {back && (
+            <Button
+              title="‹ Back"
+              onPress={() =>
+                router.canGoBack() ? router.back() : router.replace("/")
+              }
+              subtle
+            />
+          )}
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontSize: 30,
+              lineHeight: 38,
+              color: t.text,
+              fontWeight: "700",
+              letterSpacing: -0.7,
+            }}
+          >
+            {title}
+          </Text>
+          {subtitle && <Txt muted>{subtitle}</Txt>}
+          {children}
+          <View style={{ height: 24 }} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-export function Card({ children }: PropsWithChildren) {
+export function Card({ children, tone }: PropsWithChildren<{ tone?: Tone }>) {
   const t = useTheme();
   return (
-    <View style={[s.card, { backgroundColor: t.surface, borderColor: t.line }]}>
+    <View
+      style={[
+        s.card,
+        {
+          backgroundColor: t.surface,
+          borderColor: tone ? t.tones[tone].line : t.line,
+          borderLeftWidth: tone ? 4 : 1,
+        },
+      ]}
+    >
       {children}
     </View>
   );
@@ -176,8 +196,14 @@ export function Button({
         s.button,
         {
           opacity: disabled ? 0.5 : pressed ? 0.75 : 1,
-          backgroundColor: subtle ? t.surface : danger ? t.danger : t.accent,
-          borderColor: selected ? t.accent : t.line,
+          backgroundColor: subtle
+            ? selected
+              ? t.tones.teal.fill
+              : t.surface
+            : danger
+              ? t.danger
+              : t.accent,
+          borderColor: selected ? t.accent : subtle ? t.line : "transparent",
           borderWidth: selected ? 2 : 1,
         },
       ]}
@@ -211,6 +237,7 @@ export function Field({
   multiline?: boolean;
 }) {
   const t = useTheme();
+  const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: 6 }}>
       <Txt bold>
@@ -220,6 +247,8 @@ export function Field({
       <TextInput
         accessibilityLabel={`${label}${unit ? ` in ${unit}` : ""}`}
         value={value}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         onChangeText={onChange}
         keyboardType={keyboard}
         autoCapitalize="none"
@@ -229,7 +258,8 @@ export function Field({
           s.input,
           {
             color: t.text,
-            borderColor: t.line,
+            borderColor: focused ? t.accent : t.line,
+            borderWidth: focused ? 2 : 1,
             backgroundColor: t.surface,
             minHeight: multiline ? 110 : 50,
           },
@@ -316,8 +346,10 @@ export function Notice({
       style={{
         borderLeftWidth: 3,
         borderLeftColor: error ? t.danger : t.warning,
-        padding: 12,
-        backgroundColor: t.surface,
+        padding: 14,
+        borderRadius: 14,
+        gap: 10,
+        backgroundColor: error ? t.tones.rose.fill : t.tones.amber.fill,
       }}
     >
       {typeof children === "string" || typeof children === "number" ? (
@@ -339,7 +371,7 @@ export function Result({
 }) {
   const t = useTheme();
   return (
-    <Card>
+    <Card tone="teal">
       <Txt muted>{label}</Txt>
       <Text
         selectable
@@ -360,7 +392,8 @@ export function Result({
 export function Accordion({
   title,
   children,
-}: PropsWithChildren<{ title: string }>) {
+  tone = "blue",
+}: PropsWithChildren<{ title: string; tone?: Tone }>) {
   const [open, setOpen] = useState(false);
   const t = useTheme();
   return (
@@ -372,7 +405,11 @@ export function Accordion({
         onPress={() => setOpen(!open)}
         style={[
           s.button,
-          { borderWidth: 1, borderColor: t.line, backgroundColor: t.surface },
+          {
+            borderWidth: 1,
+            borderColor: t.tones[tone].line,
+            backgroundColor: t.tones[tone].fill,
+          },
         ]}
       >
         <Txt bold>
@@ -452,11 +489,16 @@ const s = StyleSheet.create({
   screen: {
     padding: 20,
     gap: 16,
-    maxWidth: 820,
+    maxWidth: metrics.contentWidth,
     width: "100%",
     alignSelf: "center",
   },
-  card: { padding: 18, gap: 12, borderRadius: 16, borderWidth: 1 },
+  card: {
+    padding: 18,
+    gap: 12,
+    borderRadius: metrics.radius.card,
+    borderWidth: 1,
+  },
   button: {
     minHeight: 48,
     paddingVertical: 12,

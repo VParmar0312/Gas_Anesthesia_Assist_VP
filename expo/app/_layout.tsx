@@ -7,7 +7,7 @@ export default function Layout() {
   const t = useTheme();
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: t.bg }}>
-      <StatusBar style={t.bg === "#10171C" ? "light" : "dark"} />
+      <StatusBar style={t.dark ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerShown: false,

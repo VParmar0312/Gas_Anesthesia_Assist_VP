@@ -1,5 +1,5 @@
 import { drugReferences } from "./drugs";
-export type ContentKind = "procedure" | "drug" | "topic" | "crisis" | "tool";
+export type ContentKind = "procedure" | "drug" | "topic" | "crisis" | "tool" | "lab";
 export interface Section {
   title: string;
   body: string;

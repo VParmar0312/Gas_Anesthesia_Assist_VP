@@ -17,13 +17,15 @@ export default function Layout() {
         tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: t.muted,
         tabBarStyle: {
-          backgroundColor: t.surface,
+          backgroundColor: t.chrome,
+          borderTopWidth: 1,
+          elevation: 8,
           borderTopColor: t.line,
           height: 72,
           paddingBottom: 12,
           paddingTop: 6,
         },
-        tabBarLabelStyle: { fontSize: 12 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
       }}
     >
       <Tabs.Screen
@@ -65,7 +67,7 @@ export default function Layout() {
         options={{
           title: "Crisis",
           tabBarIcon: ({ color, size }) => (
-            <TriangleAlert color={color} size={size} />
+            <TriangleAlert color={t.danger} size={size} />
           ),
         }}
       />

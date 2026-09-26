@@ -1,17 +1,28 @@
 import React, { useState } from "react";
-import { useRouter, Href } from "expo-router";
+import { View, Pressable } from "react-native";
+import { useRouter, useLocalSearchParams, Href } from "expo-router";
+import { ChevronRight } from "lucide-react-native";
 import { catalog, Entry } from "../content/catalog";
+import { categoryTone } from "../constants/theme";
 import { searchEntries } from "../services/search";
 import { preferencesStore, recordRecent, useStore } from "../services/data";
 import {
   Screen,
-  Field,
   Choice,
-  Card,
   Txt,
-  Button,
   Heading,
+  useTheme,
+  Button,
 } from "../components/ui";
+import {
+  IconBox,
+  SymbolName,
+  Badge,
+  SearchField,
+  EmptyState,
+  Grid,
+  Tile,
+} from "../components/ui/clinical";
 export function entryRoute(entry: Entry): Href {
   if (entry.id === "airway") return "/(tabs)/home/airway-assessment";
   if (entry.id === "pediatric") return "/(tabs)/home/pediatric-setup";
@@ -25,26 +36,53 @@ export function entryRoute(entry: Entry): Href {
         }
       : { pathname: "/library/[id]", params: { id: entry.id } };
 }
+const icons: Record<string, SymbolName> = {
+  drug: "pill",
+  tool: "calculator",
+  procedure: "check",
+  crisis: "crisis",
+  topic: "book",
+  lab: "lab",
+};
 export function EntryRow({ entry }: { entry: Entry }) {
-  const router = useRouter();
+  const router = useRouter(),
+    t = useTheme(),
+    tone = categoryTone(entry.kind === "drug" ? entry.summary : entry.kind);
   return (
-    <Card>
-      <Txt muted size={13}>
-        {entry.kind.toUpperCase()}
-      </Txt>
-      <Txt size={20} bold>
-        {entry.title}
-      </Txt>
-      <Txt muted>{entry.summary}</Txt>
-      <Button
-        title={`Open ${entry.title}`}
-        subtle
-        onPress={() => {
-          void recordRecent(entry.id).catch(() => {});
-          router.push(entryRoute(entry));
-        }}
-      />
-    </Card>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${entry.title}`}
+      onPress={() => {
+        void recordRecent(entry.id).catch(() => {});
+        router.push(entryRoute(entry));
+      }}
+      style={({ pressed }) => ({
+        borderWidth: 1,
+        borderLeftWidth: 4,
+        borderColor: t.tones[tone].line,
+        backgroundColor: pressed ? t.tones[tone].fill : t.surface,
+        borderRadius: 19,
+        padding: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        minHeight: 82,
+      })}
+    >
+      <IconBox icon={icons[entry.kind] ?? "book"} tone={tone} />
+      <View style={{ flex: 1, gap: 4 }}>
+        <Txt size={12} muted>
+          {entry.kind.toUpperCase()}
+        </Txt>
+        <Txt size={18} bold>
+          {entry.title}
+        </Txt>
+        <Txt size={13} muted>
+          {entry.summary}
+        </Txt>
+      </View>
+      <ChevronRight size={18} color={t.tones[tone].ink} />
+    </Pressable>
   );
 }
 export default function Discovery({
@@ -54,47 +92,124 @@ export default function Discovery({
   initialKind?: string;
   title?: string;
 }) {
+  const params = useLocalSearchParams<{ kind?: string }>(),
+    router = useRouter();
   const [query, setQuery] = useState(""),
-    [kind, setKind] = useState(initialKind);
+    [kind, setKind] = useState(
+      initialKind === "all" && params.kind === "drug" ? "drug" : initialKind,
+    ),
+    [category, setCategory] = useState("All classes");
   const { data: p } = useStore(preferencesStore);
-  const entries = searchEntries(catalog, query, kind);
+  const entries = searchEntries(catalog, query, kind).filter(
+    (e) =>
+      kind !== "drug" || category === "All classes" || e.summary === category,
+  );
+  const categories = [
+    "All classes",
+    ...new Set(catalog.filter((e) => e.kind === "drug").map((e) => e.summary)),
+  ];
   return (
     <Screen
       title={title}
-      subtitle="Search bundled content. Source links open online."
+      subtitle={
+        title === "Tools"
+          ? "See the inputs. Understand the result."
+          : title === "Prepare"
+            ? "Equipment, context and a shared plan."
+            : "Clinical context, a little easier to find."
+      }
     >
-      <Field
-        label="Search names, aliases or topics"
-        value={query}
-        onChange={setQuery}
-      />
+      <SearchField value={query} onChange={setQuery} />
       <Choice
-        label="Content"
+        label="Browse by type"
         value={kind}
-        onChange={setKind}
-        options={["all", "procedure", "drug", "topic", "tool", "crisis"]}
+        onChange={(v) => {
+          setKind(v);
+          setCategory("All classes");
+        }}
+        options={["all", "procedure", "drug", "lab", "topic", "tool", "crisis"]}
       />
+      {kind === "drug" && (
+        <Choice
+          label="Drug class"
+          value={category}
+          onChange={setCategory}
+          options={categories}
+        />
+      )}
       {!query && kind === "all" && (
         <>
+          <Grid>
+            <Tile
+              title="Pharmacology"
+              subtitle="Source-linked drug cards"
+              tone="purple"
+              icon="pill"
+              onPress={() => setKind("drug")}
+            />
+            <Tile
+              title="Labs & ABG"
+              subtitle="Interpretation & arithmetic"
+              tone="blue"
+              icon="lab"
+              onPress={() => router.push("/library/labs")}
+            />
+            <Tile
+              title="Anticoagulation"
+              subtitle="Match the exact scenario"
+              tone="amber"
+              icon="clock"
+              onPress={() => router.push("/library/anticoag")}
+            />
+          </Grid>
           <Heading>Favorites</Heading>
           {p.favorites.length ? (
             catalog
               .filter((e) => p.favorites.includes(e.id))
               .map((e) => <EntryRow entry={e} key={e.id} />)
           ) : (
-            <Txt muted>
-              Save a reference from its detail page for quick access.
+            <Txt muted size={14}>
+              Save useful references from their detail pages.
             </Txt>
           )}
         </>
       )}
-      <Txt muted>{entries.length} results</Txt>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
+        <Txt muted>{entries.length} references</Txt>
+        <Badge label="OFFLINE COLLECTION" />
+      </View>
       {entries.map((e) => (
         <EntryRow key={e.id} entry={e} />
       ))}
       {!entries.length && (
-        <Txt>No matches. Try a generic name or another content type.</Txt>
+        <>
+          <EmptyState
+            title="No matching references"
+            detail="Try a generic name, abbreviation, or a different content type."
+            icon="book"
+          />
+          <Button
+            title="Clear search and filters"
+            subtle
+            onPress={() => {
+              setQuery("");
+              setKind(initialKind);
+              setCategory("All classes");
+            }}
+          />
+        </>
       )}
+      <Txt muted size={12}>
+        Content is bundled for offline access. External sources require a
+        connection. Review states are shown within each reference.
+      </Txt>
     </Screen>
   );
 }
