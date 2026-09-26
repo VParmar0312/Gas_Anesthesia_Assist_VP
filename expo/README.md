@@ -1,37 +1,42 @@
-EDUCATIONAL USE ONLY — NOT MEDICAL ADVICE
+# Gas Anesthesia — clinical companion review build
 
-AnesthAssist is an educational tool for anesthesia students, residents, and trainees. All content is for learning purposes only. This app does not provide patient-specific medical advice, diagnosis, or treatment recommendations. Always consult qualified clinical supervision and institutional protocols for actual patient care decisions. Do not use this app to make real-time clinical decisions.
+Expo / React Native app with five workspaces: Home, Prepare, Tools, Library and Crisis. **This branch is a review build, not a clinically approved release.** Source reconciliation is distinct from independent clinical validation.
 
-DRUG REFERENCE
-• 80+ drugs with dosing, mechanism, contraindications, drug interactions, and pediatric dosing
-• Color-coded by clinical class: induction agents, opioids, NMBs, vasopressors, antiemetics, reversal agents, and more
+## Run
 
-CRISIS PROTOCOLS
-• 15+ step-by-step emergency protocols: MH, anaphylaxis, cardiac arrest in OR, high spinal, pulmonary embolism, OR fire, VAE, and more
-• One-tap SOS button accessible from anywhere in the app
+Requires Node 22 and npm. From this directory:
 
-CLINICAL CALCULATORS
-• MAC (age-adjusted with N₂O & opioid savings)
-• PONV Apfel Score with evidence-based prophylaxis recommendations
-• Vasoactive drip builder with real-time mL/hr output
-• Weight-based fluid, blood product, and local anesthetic dosing
-• Antibiotic prophylaxis guide by procedure type
+```sh
+npm ci
+npm run start
+npm run start-web
+npm run check
+npm run export:web
+```
 
-AIRWAY ASSESSMENT
-• Mallampati, LEMON score, and STOP-BANG in one workflow
-• Automated risk stratification with backup plan recommendations
+`npm run check` runs TypeScript, ESLint (zero warnings) and regression tests. `npx expo export --platform all` bundles web, iOS and Android; it does not build/sign native binaries or prove native runtime behavior. `npm run release:check` intentionally fails while clinical approvals are missing or expired.
 
-PEDIATRIC TOOLS
-• APLS weight estimation, ETT/blade sizing
-• Peds drug doses, defibrillation energy, ACLS epinephrine
-• Vital sign norms by age group
+## Implemented
 
-LAB & ABG REFERENCE
-• Step-by-step ABG interpretation
-• Electrolytes, hematology, coagulation, renal, liver, and cardiac panels
+- Ten scoped arithmetic tools, including body size, blood loss, lidocaine label ceilings, infusion conversion, dilution, concentration, measurements, ventilation and hemodynamics. Inputs start empty; results clear on change. No hidden pediatric age, universal LA maximum, automatic NPO replacement or negative-result clamping.
+- Eight procedure preparation guides with Quick/Learn views, personal checklists and related references.
+- Twenty-three source-linked medication references with indication/population/route context; entries distinguish selected label values from regimens requiring the full label.
+- Seven crisis reference workflows, persisted event start/progress, formulation-specific MH arithmetic and explicit new-event confirmation. Timers measure wall-clock elapsed time; they are not drug alarms.
+- Offline in-app search with aliases, typo tolerance, filters, favorites and recents. Native content is bundled; external source links require connectivity. Web offline cold launch is not implemented as a PWA.
+- Airway review with unassessed states and a separate complete-answer adult STOP-Bang screen. Pediatric preparation and anticoagulation scenario checklists explicitly withhold unvalidated sizing/timing outputs.
+- Room preparation sessions, stale-day warnings, reset confirmation and reusable local items.
+- Case facts with age in completed months (including zero), multiple techniques/qualifying experiences, distinct procedure counts, derived ACGME experience totals, legacy reconciliation, all-history search, edit, delete/undo, CSV export and validated JSON merge/import.
+- Light/dark/system appearance, resident/attending home, reading-depth preferences and personal institution notes.
+- Serialized local persistence, backup-before-write, validation, explicit recovery and raw export. Original legacy keys are preserved. AsyncStorage is not encrypted.
 
-CASE LOGGING
-• ACGME-aligned case tracking with milestone progress
-• Pre-flight checklist (MSMAIDS format)
+## Architecture
 
-This app is an independent educational project and is not affiliated with, endorsed by, or approved by any hospital, medical board, or regulatory agency. Users should always defer to their supervising physicians, institutional protocols, and current clinical guidelines for all patient care decisions.
+`app/` contains routes; `components/ui/` holds accessible controls and color tokens; `content/` contains versioned source-linked data and scope; `features/` holds reusable workflows; `services/` owns local persistence, export and search; `utils/` contains pure arithmetic. There is one state owner per stored domain. Reference access does not depend on case-log health.
+
+The previous unused location/image-picker and Rork SDK dependencies were removed. The npm lockfile is the dependency authority; the stale Bun lockfile is removed. Package and app permissions still require review of the actual native artifact.
+
+## Clinical and release work
+
+See [clinical review requirements](docs/CLINICAL_REVIEW.md), [implementation coverage](docs/IMPLEMENTATION.md) and [verification](docs/VERIFICATION.md). No cloud sync, signed institution packs, automatic clinical updating, widgets, Watch app or autonomous patient-specific recommendations are implemented.
+
+Do not add patient identifiers to cases, notes, backups, screenshots or bug reports. Keep production distribution blocked until clinical review and real-device release verification are complete.

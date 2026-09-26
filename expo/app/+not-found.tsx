@@ -1,40 +1,17 @@
-import { Link, Stack } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
-
-export default function NotFoundScreen() {
+import React from "react";
+import { useRouter } from "expo-router";
+import { Screen, Txt, Button } from "../components/ui";
+export default function Missing() {
+  const router = useRouter();
   return (
-    <>
-      <Stack.Screen options={{ title: "Not Found" }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>Screen not found</Text>
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Return to Dashboard</Text>
-        </Link>
-      </View>
-    </>
+    <Screen title="Page not found">
+      <Txt>
+        The reference may have moved. Search the current bundled library.
+      </Txt>
+      <Button
+        title="Open library"
+        onPress={() => router.replace("/(tabs)/library")}
+      />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: Colors.background,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: Colors.textPrimary,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
-    fontSize: 14,
-    color: Colors.accent,
-  },
-});
