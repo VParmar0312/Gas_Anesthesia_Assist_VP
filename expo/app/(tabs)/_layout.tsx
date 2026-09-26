@@ -1,69 +1,75 @@
-import { Tabs } from "expo-router";
-import { Home, Calculator, AlertTriangle, ClipboardList, BookOpen } from "lucide-react-native";
 import React from "react";
-import Colors from "@/constants/colors";
-
-export default function TabLayout() {
+import { Tabs } from "expo-router";
+import {
+  Home,
+  ClipboardList,
+  Calculator,
+  BookOpen,
+  TriangleAlert,
+} from "lucide-react-native";
+import { useTheme } from "../../components/ui";
+export default function Layout() {
+  const t = useTheme();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.accent,
-        tabBarInactiveTintColor: Colors.textTertiary,
+        tabBarActiveTintColor: t.accent,
+        tabBarInactiveTintColor: t.muted,
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
+          backgroundColor: t.surface,
+          borderTopColor: t.line,
+          height: 72,
+          paddingBottom: 12,
+          paddingTop: 6,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600' as const,
-        },
+        tabBarLabelStyle: { fontSize: 12 },
       }}
     >
       <Tabs.Screen
-        name="(home)"
+        name="home"
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="(calculators)"
+        name="prepare"
         options={{
-          title: "Calcs",
-          tabBarIcon: ({ color, size }) => <Calculator color={color} size={size} />,
+          title: "Prepare",
+          tabBarIcon: ({ color, size }) => (
+            <ClipboardList color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="(crisis)"
+        name="tools"
+        options={{
+          title: "Tools",
+          tabBarIcon: ({ color, size }) => (
+            <Calculator color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="library"
+        options={{
+          title: "Library",
+          tabBarIcon: ({ color, size }) => (
+            <BookOpen color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="crisis"
         options={{
           title: "Crisis",
-          tabBarIcon: ({ color, size }) => <AlertTriangle color={color} size={size} />,
-          tabBarBadge: '',
-          tabBarBadgeStyle: {
-            backgroundColor: Colors.emergency,
-            minWidth: 8,
-            maxHeight: 8,
-            borderRadius: 4,
-            top: 6,
-          },
+          tabBarIcon: ({ color, size }) => (
+            <TriangleAlert color={color} size={size} />
+          ),
         }}
       />
-      <Tabs.Screen
-        name="(cases)"
-        options={{
-          title: "Cases",
-          tabBarIcon: ({ color, size }) => <ClipboardList color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="(references)"
-        options={{
-          title: "Reference",
-          tabBarIcon: ({ color, size }) => <BookOpen color={color} size={size} />,
-        }}
-      />
+      <Tabs.Screen name="cases" options={{ href: null }} />
     </Tabs>
   );
 }
