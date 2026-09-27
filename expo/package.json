@@ -9,10 +9,11 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "check": "npm run typecheck && npm run lint && npm test",
+    "check": "npm run typecheck && npm run lint && npm test && npm run content:check",
     "export:web": "expo export --platform web",
     "format": "prettier --write \"{app,components,content,features,services,tests,utils}/**/*.{ts,tsx}\"",
-    "release:check": "tsx scripts/release-check.ts"
+    "release:check": "tsx scripts/release-check.ts",
+    "content:check": "tsx scripts/content-check.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

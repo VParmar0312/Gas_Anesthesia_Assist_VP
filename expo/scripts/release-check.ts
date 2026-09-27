@@ -1,3 +1,10 @@
-import {releaseBlockers,reviewRecords} from '../content/review';
-const blocked=releaseBlockers(reviewRecords);
-if(blocked.length){console.error(`Clinical release blocked: ${blocked.length} entries lack current independent approval. See docs/CLINICAL_REVIEW.md.`);process.exitCode=1;}else console.log('All content review records are current. Complete the native release checks before distribution.');
+import { releaseBlockers, reviewRecords } from "../content/review";
+import { contentProblems } from "../content/validate";
+const structure = contentProblems(),
+  blocked = releaseBlockers(reviewRecords);
+if (structure.length) console.error(structure.join("\n"));
+if (blocked.length)
+  console.error(
+    `Clinical release blocked: ${blocked.length} entries lack current authorized approval and matching acceptance fixtures.\n${blocked.join(", ")}`,
+  );
+process.exitCode = structure.length || blocked.length ? 1 : 0;
