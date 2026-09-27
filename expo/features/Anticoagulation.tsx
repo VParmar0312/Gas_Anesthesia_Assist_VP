@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Screen,
-  Heading,
   Txt,
   Choice,
   Field,
@@ -10,71 +9,117 @@ import {
   CitationPanel,
   Button,
 } from "../components/ui";
-/** Captures the guideline branch without fabricating a complete anticoagulation rules engine. */
+import { Panel, Badge } from "../components/ui/clinical";
+import {
+  antithrombotics,
+  emptyScenario,
+  scenarioMissing,
+  anticoagEvents,
+  AnticoagScenario,
+} from "../content/anticoagulation";
 export default function Anticoagulation() {
-  const [drug, setDrug] = useState(""),
-    [dose, setDose] = useState(""),
-    [renal, setRenal] = useState(""),
-    [event, setEvent] = useState(""),
-    [block, setBlock] = useState(""),
-    [catheter, setCatheter] = useState(""),
+  const [scenario, setScenario] = useState({ ...emptyScenario }),
     [reviewed, setReviewed] = useState(false),
     [show, setShow] = useState(false);
-  const change = (set: (s: string) => void) => (value: string) => {
-    set(value);
+  const change = (key: keyof AnticoagScenario) => (value: string) => {
+    setScenario((s) => ({ ...s, [key]: value }));
     setShow(false);
     setReviewed(false);
   };
+  const drug = antithrombotics.find((d) => d.name === scenario.drug);
   return (
-    <Screen title="Anticoagulation & regional anesthesia" back>
+    <Screen
+      title="Anticoagulation"
+      subtitle="A specific drug. A specific event. A complete context."
+      back
+    >
+      <Badge label="REGIONAL ANESTHESIA · ASRA FIFTH EDITION" tone="purple" />
       <Notice>
-        Scenario checklist for the ASRA fifth-edition guideline. This build does
-        not calculate permission to perform a block or restart a drug.
+        Guided source-review checklist. Numeric timing remains unavailable
+        pending exact-source reconciliation and independent clinical review.
+        This screen cannot clear a block or a restart.
       </Notice>
-      <Choice
-        label="Planned technique"
-        value={block}
-        onChange={change(setBlock)}
-        options={["Neuraxial", "Deep plexus / peripheral", "Other / uncertain"]}
-      />
-      <Field
-        label="Antithrombotic drug"
-        value={drug}
-        onChange={change(setDrug)}
-      />
-      <Field
-        label="Dose, schedule and indication"
-        value={dose}
-        onChange={change(setDose)}
-      />
-      <Field
-        label="Renal function and how it was assessed"
-        value={renal}
-        onChange={change(setRenal)}
-      />
-      <Choice
-        label="Event being considered"
-        value={event}
-        onChange={change(setEvent)}
-        options={[
-          "Needle placement",
-          "Catheter removal",
-          "Postoperative restart",
-        ]}
-      />
-      <Choice
-        label="Catheter status"
-        value={catheter}
-        onChange={change(setCatheter)}
-        options={[
-          "No catheter",
-          "Catheter in situ",
-          "Catheter removed",
-          "Uncertain",
-        ]}
-      />
+      <Panel title="1 / Medication & dose context" icon="pill" tone="purple">
+        <Choice
+          label="Antithrombotic"
+          value={scenario.drug}
+          onChange={change("drug")}
+          options={antithrombotics.map((d) => d.name)}
+        />
+        {drug && (
+          <>
+            <Badge label={drug.class} tone="purple" />
+            <Txt muted>{drug.aliases}</Txt>
+          </>
+        )}
+        <Field
+          label="Exact product, route, dose, schedule and indication"
+          value={scenario.dose}
+          onChange={change("dose")}
+        />
+        <Choice
+          label="Dose category to verify against guideline"
+          value={scenario.doseClass}
+          onChange={change("doseClass")}
+          options={[
+            "Low / prophylactic",
+            "High / therapeutic",
+            "Uncertain — verify",
+          ]}
+        />
+        <Txt muted size={13}>
+          Indication alone does not establish a guideline dose category.
+        </Txt>
+      </Panel>
+      <Panel title="2 / Timing & patient modifiers" icon="clock" tone="amber">
+        <Field
+          label="Last administration date, time and time zone (or unknown)"
+          value={scenario.lastDose}
+          onChange={change("lastDose")}
+        />
+        <Field
+          label="Renal function, units, assessment method and date"
+          value={scenario.renal}
+          onChange={change("renal")}
+        />
+        <Field
+          label="Other antithrombotics, bleeding risks and traumatic puncture (or none known)"
+          value={scenario.modifiers}
+          onChange={change("modifiers")}
+          multiline
+        />
+      </Panel>
+      <Panel title="3 / Procedure & catheter" icon="layers" tone="blue">
+        <Choice
+          label="Technique"
+          value={scenario.technique}
+          onChange={change("technique")}
+          options={[
+            "Neuraxial",
+            "Deep plexus / peripheral",
+            "Other / uncertain",
+          ]}
+        />
+        <Choice
+          label="Event"
+          value={scenario.event}
+          onChange={change("event")}
+          options={anticoagEvents}
+        />
+        <Choice
+          label="Catheter status"
+          value={scenario.catheter}
+          onChange={change("catheter")}
+          options={[
+            "No catheter",
+            "Catheter in situ",
+            "Catheter removed",
+            "Uncertain",
+          ]}
+        />
+      </Panel>
       <Check
-        label="I reviewed last administration, other antithrombotics, bleeding risk and traumatic puncture with the responsible team."
+        label="I reviewed this scenario with the responsible team; uncertain fields still require resolution."
         checked={reviewed}
         onPress={() => {
           setReviewed(!reviewed);
@@ -85,39 +130,79 @@ export default function Anticoagulation() {
         title="Summarize scenario for source review"
         onPress={() => setShow(true)}
       />
+      <Button
+        title="Reset scenario"
+        subtle
+        onPress={() => {
+          setScenario({ ...emptyScenario });
+          setReviewed(false);
+          setShow(false);
+        }}
+      />
       {show &&
-        (!drug.trim() ||
-        !dose.trim() ||
-        !renal.trim() ||
-        !event ||
-        !block ||
-        !catheter ||
-        !reviewed ? (
+        (scenarioMissing(scenario).length || !reviewed ? (
           <Notice error>
-            Complete each field and context check. An incomplete scenario cannot
-            select a guideline branch.
+            Complete each context field and the team review check. Use “unknown”
+            when information is unavailable; this never permits a timing
+            recommendation.
           </Notice>
         ) : (
-          <>
-            <Heading>Scenario to match to the guideline</Heading>
-            <Txt>
-              {drug} • {dose}
+          <Panel title="Scenario for discussion" tone="teal" icon="check">
+            <Txt bold>
+              {scenario.drug} · {drug?.class}
             </Txt>
             <Txt>
-              {block} • {event} • {catheter}
+              {scenario.dose} · {scenario.doseClass}
             </Txt>
-            <Txt>Renal assessment: {renal}</Txt>
-            <Notice>
-              No timing recommendation generated. Locate the matching drug and
-              low/high-dose category, then the specific event. Placement,
-              removal and restart intervals are not interchangeable. Verify the
-              locally adopted version and exceptions.
-            </Notice>
-          </>
+            <Txt>
+              {scenario.technique} · {scenario.event} · {scenario.catheter}
+            </Txt>
+            <Txt>Last administration: {scenario.lastDose}</Txt>
+            <Txt>Renal assessment: {scenario.renal}</Txt>
+            <Txt>Modifiers: {scenario.modifiers}</Txt>
+            <Badge label="TIMING NOT GENERATED" tone="amber" />
+          </Panel>
         ))}
-      <Txt muted>
-        Entries are temporary and are cleared when this screen is left. Do not
-        include patient identifiers.
+      <Panel title="Pre-procedure hold" tone="amber" icon="clock">
+        <Txt>
+          Pending review. Match the exact drug, low/high-dose category, renal
+          context and technique before consulting the interval. An unknown last
+          dose remains unresolved.
+        </Txt>
+      </Panel>
+      <Panel title="Catheter events" tone="purple" icon="layers">
+        <Txt>
+          Placement and removal are separate events. Verify in-situ
+          administration and the sequence of doses and catheter manipulation in
+          the exact guideline branch.
+        </Txt>
+      </Panel>
+      <Panel title="Postoperative restart" tone="green" icon="clock">
+        <Txt>
+          Pending review. Verify surgical hemostasis, procedure bleeding risk
+          and catheter-event context separately. A pre-procedure hold interval
+          cannot be used as a restart interval.
+        </Txt>
+      </Panel>
+      <Panel title="Laboratory considerations" tone="blue" icon="lab">
+        <Txt>
+          Ask which assay is applicable, its units, calibration and sample
+          timing. This build does not infer absent drug effect from an ordinary
+          coagulation result or supply a universal “safe” laboratory threshold.
+        </Txt>
+      </Panel>
+      <Panel title="Bridging & urgent management" tone="rose" icon="crisis">
+        <Txt>
+          Bridging is a separate thrombotic/bleeding-risk decision for the
+          responsible specialist. Reversal is not an automatic route to
+          regional-anesthesia clearance. Follow your institution’s urgent
+          bleeding and reversal pathways.
+        </Txt>
+      </Panel>
+      <Txt muted size={13}>
+        Temporary scenario only; no patient identifiers. ASRA regional guidance
+        is not interchangeable with interventional pain guidance or other
+        jurisdictions.
       </Txt>
       <CitationPanel ids={["asra"]} />
     </Screen>

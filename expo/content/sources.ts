@@ -1,5 +1,5 @@
 import { drugReferences } from "./drugs";
-export const contentVersion = "2026.09.24-rc1";
+export const contentVersion = "2026.09.26-rc2";
 export interface Source {
   id: string;
   title: string;
@@ -158,3 +158,51 @@ sources.bsa = {
   checked: "2026-09-25",
   scope: "Adult BSA formula comparison; not a dosing recommendation",
 };
+
+// Exact label selected for the representative monograph. Reconciliation is not approval.
+sources["label-propofol"] = {
+  ...sources["label-propofol"],
+  title: "Avet / Heritage • Propofol injectable emulsion (DailyMed)",
+  version: "SPL version 14; effective 2025-05-26; label revised May 2025",
+  checked: "2026-09-26",
+  scope:
+    "US; IV emulsion 10 mg/mL with EDTA; selected indication-specific facts, not complete prescribing information",
+};
+
+Object.assign(sources, {
+  "acid-base": {
+    id: "acid-base",
+    title: "Merck Manual Professional • Acid-Base Disorders",
+    version: "Reviewed March 2025; updated April 2025",
+    url: "https://www.merckmanuals.com/professional/nephrology/acid-base-regulation-and-disorders/acid-base-disorders",
+    checked: "2026-09-26",
+    scope:
+      "Adult educational acid-base interpretation; approximate compensation models; no treatment recommendations",
+  },
+  figge: {
+    id: "figge",
+    title: "Figge et al. • Anion gap and hypoalbuminemia",
+    version: "Critical Care Medicine 1998;26:1807–1810. PMID 9824071",
+    url: "https://pubmed.ncbi.nlm.nih.gov/9824071/",
+    checked: "2026-09-26",
+    scope:
+      "Observational ICU study; albumin adjustment of gap, not a standalone diagnosis",
+  },
+  "mayo-renal": {
+    id: "mayo-renal",
+    title: "Mayo Clinic Laboratories • RFAMA serum renal panel",
+    version: "Live test catalog; revision date not stated",
+    url: "https://renal.testcatalog.org/show/RFAMA",
+    checked: "2026-09-26",
+    scope:
+      "Selected adult serum reference intervals from this laboratory; not universal cutoffs",
+  },
+  "mayo-cbc": {
+    id: "mayo-cbc",
+    title: "Mayo Clinic Laboratories • CBC with differential",
+    version: "Live test catalog; revision date not stated",
+    url: "https://www.mayocliniclabs.com/test-catalog/overview/9109",
+    checked: "2026-09-26",
+    scope: "Blood CBC; laboratory and population-specific interpretation",
+  },
+});
