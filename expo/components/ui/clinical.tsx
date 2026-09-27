@@ -248,6 +248,10 @@ export function Progress({
     <View
       accessibilityRole="progressbar"
       accessibilityLabel={label}
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-valuenow={Math.min(value, total)}
+      aria-valuetext={`${value} of ${total}`}
       accessibilityValue={{
         min: 0,
         max: total,

@@ -19,14 +19,17 @@ import { palettes, metrics, Tone } from "../../constants/theme";
 export function useTheme() {
   const { data } = useStore(preferencesStore);
   const system = useColorScheme();
-  const palette = palettes[
-    data.theme === "system"
-      ? system === "dark"
-        ? "dark"
-        : "light"
-      : data.theme
-  ];
-  return data.contrast === "increased" ? { ...palette, line: palette.muted, muted: palette.text } : palette;
+  const palette =
+    palettes[
+      data.theme === "system"
+        ? system === "dark"
+          ? "dark"
+          : "light"
+        : data.theme
+    ];
+  return data.contrast === "increased"
+    ? { ...palette, line: palette.muted, muted: palette.text }
+    : palette;
 }
 export function Txt({
   children,
@@ -76,7 +79,7 @@ export function Screen({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          keyboardDismissMode="on-drag"
+          keyboardDismissMode={Platform.OS === "web" ? "none" : "on-drag"}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={s.screen}
         >

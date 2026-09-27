@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Pressable, ScrollView } from "react-native";
 import { useRouter, useLocalSearchParams, Href } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
@@ -120,6 +120,13 @@ export default function Discovery({
       initialKind === "all" && params.kind === "drug" ? "drug" : initialKind,
     ),
     [category, setCategory] = useState("All classes");
+  useEffect(() => {
+    if (initialKind === "all" && params.kind === "drug") {
+      setKind("drug");
+      setCategory("All classes");
+      setQuery("");
+    }
+  }, [initialKind, params.kind]);
   const { data: p } = useStore(preferencesStore);
   const { data: searches } = useStore(searchStore);
   const entries = searchEntries(catalog, query, kind).filter(
