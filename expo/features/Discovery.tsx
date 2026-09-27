@@ -1,11 +1,17 @@
 import React, { useState } from "react";
-import { View, Pressable } from "react-native";
+import { View, Pressable, ScrollView } from "react-native";
 import { useRouter, useLocalSearchParams, Href } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { catalog, Entry } from "../content/catalog";
 import { categoryTone } from "../constants/theme";
 import { searchEntries } from "../services/search";
-import { preferencesStore, recordRecent, useStore } from "../services/data";
+import {
+  preferencesStore,
+  recordRecent,
+  useStore,
+  searchStore,
+  recordSearch,
+} from "../services/data";
 import {
   Screen,
   Choice,
@@ -44,15 +50,28 @@ const icons: Record<string, SymbolName> = {
   topic: "book",
   lab: "lab",
 };
-export function EntryRow({ entry }: { entry: Entry }) {
+export function EntryRow({
+  entry,
+  onOpen,
+}: {
+  entry: Entry;
+  onOpen?: () => void;
+}) {
   const router = useRouter(),
     t = useTheme(),
-    tone = categoryTone(entry.kind === "drug" ? entry.summary : entry.kind);
+    tone = categoryTone(
+      entry.kind === "drug"
+        ? entry.summary
+        : entry.kind === "tool"
+          ? entry.title
+          : entry.kind,
+    );
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Open ${entry.title}`}
       onPress={() => {
+        onOpen?.();
         void recordRecent(entry.id).catch(() => {});
         router.push(entryRoute(entry));
       }}
@@ -72,7 +91,9 @@ export function EntryRow({ entry }: { entry: Entry }) {
       <IconBox icon={icons[entry.kind] ?? "book"} tone={tone} />
       <View style={{ flex: 1, gap: 4 }}>
         <Txt size={12} muted>
-          {entry.kind.toUpperCase()}
+          {entry.id.startsWith("review-")
+            ? "DRUG · MONOGRAPH PENDING"
+            : entry.kind.toUpperCase()}
         </Txt>
         <Txt size={18} bold>
           {entry.title}
@@ -100,6 +121,7 @@ export default function Discovery({
     ),
     [category, setCategory] = useState("All classes");
   const { data: p } = useStore(preferencesStore);
+  const { data: searches } = useStore(searchStore);
   const entries = searchEntries(catalog, query, kind).filter(
     (e) =>
       kind !== "drug" || category === "All classes" || e.summary === category,
@@ -120,6 +142,33 @@ export default function Discovery({
       }
     >
       <SearchField value={query} onChange={setQuery} />
+      {!query && searches.length > 0 && (
+        <>
+          <Txt muted size={13}>
+            RECENT SEARCHES · NO PATIENT DETAILS
+          </Txt>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {searches.map((q) => (
+              <Button
+                key={q}
+                title={q}
+                subtle
+                onPress={() => {
+                  setQuery(q);
+                  setKind("all");
+                }}
+              />
+            ))}
+            <Button
+              title="Clear recent searches"
+              subtle
+              onPress={() => {
+                void searchStore.update(() => []).catch(() => {});
+              }}
+            />
+          </View>
+        </>
+      )}
       <Choice
         label="Browse by type"
         value={kind}
@@ -130,12 +179,51 @@ export default function Discovery({
         options={["all", "procedure", "drug", "lab", "topic", "tool", "crisis"]}
       />
       {kind === "drug" && (
-        <Choice
-          label="Drug class"
-          value={category}
-          onChange={setCategory}
-          options={categories}
-        />
+        <>
+          <Txt bold size={14}>
+            Drug class
+          </Txt>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {categories.map((c) => (
+              <Button
+                key={c}
+                title={c}
+                subtle
+                selected={c === category}
+                onPress={() => setCategory(c)}
+              />
+            ))}
+          </ScrollView>
+        </>
+      )}
+      {!query && title === "Prepare" && (
+        <Grid>
+          <Tile
+            title="Room setup"
+            subtitle="Resume your preparation"
+            icon="check"
+            tone="teal"
+            onPress={() => router.push("/preflight")}
+          />
+          <Tile
+            title="Pediatric setup"
+            subtitle="Age & equipment context"
+            icon="baby"
+            tone="blue"
+            onPress={() => router.push("/pediatric-setup")}
+          />
+          <Tile
+            title="Airway review"
+            subtitle="Observations & screening"
+            icon="airway"
+            tone="amber"
+            onPress={() => router.push("/airway-assessment")}
+          />
+        </Grid>
       )}
       {!query && kind === "all" && (
         <>
@@ -186,7 +274,13 @@ export default function Discovery({
         <Badge label="OFFLINE COLLECTION" />
       </View>
       {entries.map((e) => (
-        <EntryRow key={e.id} entry={e} />
+        <EntryRow
+          key={e.id}
+          entry={e}
+          onOpen={() => {
+            void recordSearch(query).catch(() => {});
+          }}
+        />
       ))}
       {!entries.length && (
         <>

@@ -61,10 +61,14 @@ export const palettes = {
 };
 export function categoryTone(category: string): Tone {
   if (/opioid|analgesi|timing|fluid/i.test(category)) return "amber";
-  if (/sedation|neuromuscular|induction/i.test(category)) return "purple";
-  if (/vasopressor|emergency|hemost|crisis|cardiac/i.test(category))
+  if (/sedation|neuromuscular|induction|body|dilution/i.test(category))
+    return "purple";
+  if (/vasopressor|emergency|hemo|crisis|cardiac|blood/i.test(category))
     return "rose";
   if (/reversal|success/i.test(category)) return "green";
-  if (/inhaled|volatile|prepare|procedure/i.test(category)) return "teal";
+  if (
+    /inhaled|volatile|prepare|procedure|infusion|concentration/i.test(category)
+  )
+    return "teal";
   return "blue";
 }

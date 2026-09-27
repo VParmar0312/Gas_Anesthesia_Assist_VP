@@ -19,13 +19,14 @@ import { palettes, metrics, Tone } from "../../constants/theme";
 export function useTheme() {
   const { data } = useStore(preferencesStore);
   const system = useColorScheme();
-  return palettes[
+  const palette = palettes[
     data.theme === "system"
       ? system === "dark"
         ? "dark"
         : "light"
       : data.theme
   ];
+  return data.contrast === "increased" ? { ...palette, line: palette.muted, muted: palette.text } : palette;
 }
 export function Txt({
   children,

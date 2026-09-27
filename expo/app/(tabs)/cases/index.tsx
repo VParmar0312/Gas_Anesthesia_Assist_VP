@@ -10,6 +10,7 @@ import {
   AsyncButton,
   Notice,
   Field,
+  Choice,
   CitationPanel,
   Accordion,
 } from "../../../components/ui";
@@ -21,8 +22,18 @@ export default function Cases() {
   const [query, setQuery] = useState(""),
     [pending, setPending] = useState(""),
     [deleted, setDeleted] = useState<CaseRecord | null>(null);
+  const [filter, setFilter] = useState("all");
   const requirements = deriveRequirements(data);
   const filtered = data
+    .filter(
+      (c) =>
+        filter === "all" ||
+        (filter === "emergency"
+          ? c.emergency
+          : filter === "imported"
+            ? c.legacy
+            : c.techniques.includes(filter)),
+    )
     .filter((c) =>
       `${c.month} ${c.procedure} ${c.techniques.join(" ")}`
         .toLowerCase()
@@ -89,6 +100,21 @@ export default function Cases() {
         label="Filter by month, procedure or technique"
         value={query}
         onChange={setQuery}
+      />
+      <Choice
+        label="History filter"
+        value={filter}
+        onChange={setFilter}
+        options={[
+          "all",
+          "general",
+          "sedation",
+          "spinal",
+          "epidural",
+          "block",
+          "emergency",
+          "imported",
+        ]}
       />
       {deleted && (
         <Card>

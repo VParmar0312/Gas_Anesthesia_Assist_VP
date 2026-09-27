@@ -15,6 +15,9 @@ import {
 } from "../../components/ui";
 export default function Tool() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  return <ToolContent key={id} id={id} />;
+}
+function ToolContent({ id }: { id: string }) {
   const tool = toolDefinitions.find((t) => t.id === id);
   const [values, setValues] = useState<Record<string, string>>({}),
     [confirmed, setConfirmed] = useState(false),

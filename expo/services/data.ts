@@ -1,3 +1,8 @@
+import {
+  PediatricSession,
+  isPediatricSession,
+  newPediatricSession,
+} from "../content/pediatric";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useSyncExternalStore } from "react";
 import { Store } from "./store";
@@ -11,6 +16,7 @@ export const caseStore = new Store<CaseRecord[]>(
 );
 export interface Preferences {
   theme: "system" | "light" | "dark";
+  contrast?: "standard" | "increased";
   role: "resident" | "attending";
   mode: "quick" | "learn";
   favorites: string[];
@@ -38,6 +44,8 @@ export const preferencesStore = new Store<Preferences>(
     return (
       !!p &&
       ["system", "light", "dark"].includes(p.theme) &&
+      (p.contrast === undefined ||
+        ["standard", "increased"].includes(p.contrast)) &&
       ["resident", "attending"].includes(p.role) &&
       ["quick", "learn"].includes(p.mode) &&
       Array.isArray(p.favorites) &&
@@ -119,4 +127,32 @@ export function recordRecent(id: string) {
     ...p,
     recents: [id, ...p.recents.filter((x) => x !== id)].slice(0, 12),
   }));
+}
+
+// Separate envelopes preserve existing PR #4 case/preferences/session schemas.
+export const pediatricStore = new Store<PediatricSession>(
+  AsyncStorage,
+  "gas:pediatric:v1",
+  newPediatricSession(),
+  isPediatricSession,
+);
+export const searchStore = new Store<string[]>(
+  AsyncStorage,
+  "gas:searches:v1",
+  [],
+  (v): v is string[] =>
+    Array.isArray(v) &&
+    v.length <= 8 &&
+    v.every((x) => typeof x === "string" && x.length > 0 && x.length <= 80),
+);
+export function recordSearch(query: string) {
+  const q = query.trim().slice(0, 80);
+  return q
+    ? searchStore.update((v) =>
+        [q, ...v.filter((x) => x.toLowerCase() !== q.toLowerCase())].slice(
+          0,
+          8,
+        ),
+      )
+    : Promise.resolve();
 }
