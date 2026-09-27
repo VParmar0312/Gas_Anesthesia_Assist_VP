@@ -1,39 +1,49 @@
-# Verification record
+# Verification record — 2026-09-27
 
-Engineering verification is separate from clinical approval.
+Engineering verification is separate from clinical approval. Tests used isolated local browser storage and synthetic cases only.
 
-## Automated
+## Commands and outcomes
 
-- `npm run check`: TypeScript, zero-warning ESLint, and regression tests pass locally.
-- Regression coverage: normal/high-weight lidocaine caps; invalid exposure; concentration/infusion/dilution units; blood-loss/Hct direction; body-size domains; strict parsing; dantrolene formulations; STOP-Bang unanswered/combination pathways; concurrent writes; failed disk saves; corruption preservation; backup recovery; explicit recovery without prior backup; legacy age zero; derived overlapping/procedure credits; import collisions; CSV injection escaping; search ranking/typos; content/source/related-link integrity; deep-link preservation; review release gate; very small positive outputs.
-- `expo export --platform all`: web, iOS Hermes and Android Hermes bundles produced locally. This is **not** an installed native app test.
-- `npm run release:check`: expected failure while draft entries have no clinical approval.
+| Check | Result |
+|---|---|
+| `npm ci` | Clean locked install passed; no new runtime dependencies |
+| `npm run check` | TypeScript passed, ESLint zero warnings, **33/33 tests passed**, content schema passed |
+| `npx expo export --platform all` | Web, iOS Hermes and Android Hermes exports passed after final input-focus fix |
+| `node --import tsx scripts/release-check.ts` | Expected exit 1: **110 draft entries** lack authorized approval and matching acceptance fixtures |
+| `git diff --check` | Passed |
+| Playwright against exported web app in Chrome | Ten workflow groups passed, zero page JavaScript errors |
+| Viewport sweep | 96 after captures, 28 before captures; no document horizontal overflow/page errors |
 
-## Browser smoke checks
+Regression coverage preserves PR #4 calculation boundaries, invalid inputs, lidocaine caps, exact dantrolene formulations, STOP-Bang unanswered/combination pathways, serialized writes, failure rollback, corruption/recovery, age zero, derived overlapping/procedure credits, import collision rejection, CSV formula escaping, search ranking/typos and canonical links. New tests cover compensation models and partial optional inputs, anion-gap chemistry versus blood gas, explicit correction references, pediatric envelope reload/validation, new fact scope/units, scenario completeness, authorized approval/fixture dates, stale checklist IDs and semantic text contrast (at least 4.5:1 for tested pairs). Arithmetic examples are engineering expectations, not independently approved clinical fixtures.
 
-Local production web bundle, synthetic data only:
+## Browser workflow coverage
 
-- Cold launch reaches Home with five tabs; canonical paths avoid the prior ambiguous grouped-index routes.
-- Lidocaine starts without a weight or result; blank Calculate shows an error.
-- 70 kg / 1% / no epinephrine / confirmed applicable scope shows 300 mg and 30 mL.
-- Editing the weight clears the result and scope confirmation.
-- Zero-month synthetic case saves as zero, increments all three pediatric categories, and appears after navigation.
-- Delete confirmation recomputes pediatric counts to zero and exposes Undo; Undo persists after a full reload.
-- MH event start, action acknowledgement and elapsed time persist after reload; patient weight/formulation/result do not persist. Synthetic 70 kg / Ryanodex produces 175 mg, one vial, 5 mL sterile water per vial.
-- Brand alias “Bridion” resolves to Sugammadex; favoriting survives reload; source/version/review status expands correctly.
-- Preparation checks survive reload; confirmed new session clears checks and remains cleared after reload.
-- Responsive dark layout inspected at 390 × 844 and wider browser size. Native accessibility validation remains outstanding.
+1. Home → typo search → propofol, distinct sections, expanded interactions and persisted favorite.
+2. Empty infusion form rejects; entered synthetic 70 kg / 0.1 mcg/kg/min / 16 mcg/mL returns 26.25 mL/h; edit invalidates; reset empties.
+3. Explicit ABG entry and selected Winter model shows transparent 24–28 mmHg arithmetic; edit invalidates; reset clears.
+4. Anticoagulation drug/event scenario captures unknowns; generates no timing or clearance; changing event invalidates summary.
+5. Pediatric zero months / 3.2 kg and checks survive reload; measurement edits clear checks; canceled and confirmed resets work; no sizing/dose output.
+6. Room checklist resumes; canceled reset preserves; confirmed reset clears.
+7. Crisis event confirmed start and checked action survive reload; elapsed-time disclaimer remains; canceled new event preserves state.
+8. Case create age zero / two distinct blocks derives expected credits; edit age, delete/undo, CSV formula escape, JSON duplicate merge and conflicting-ID rejection.
+9. Loaded web app continues bundled alias search and reference navigation after network disabled. **No offline web cold-launch claim.**
+10. Legacy zero-month case migrates, retains reconciliation flag and original storage.
 
-## Dependency audit (2026-09-26)
+## Visual and accessibility checks
 
-`npm audit` reports 17 findings: 16 moderate, one high, zero critical. The PostCSS override to 8.5.28 removes its high-severity advisory. The remaining high finding is `image-size` through Metro's asset pipeline (GHSA-5p2g-fcmc-qvqq). Metro 0.83.3 uses the old filename/default-export API; blindly overriding to image-size 2.x would break that interface. A compatible Expo/Metro update or reviewed backport, followed by native/build validation, remains required. The current app has no user image-upload pipeline, but that does not make the dependency finding resolved.
+[Before/after gallery and evidence](visual-review/README.md): 320 × 720, 430 × 932 and 834 × 1112, light/dark, 16 primary routes. Representative home, library, drug, anticoagulation, labs, pediatric and crisis screenshots inspected. Expanded propofol content also tested at 150% browser text size; portrait-to-landscape resize, keyboard entry and sequential field focus, increased contrast and dark ABG result inspected. Reduced-motion preference supplied; every native navigator now uses the shared reduce-motion listener.
+
+QA found and fixed missing web progress values and loss of input focus when React Native Web's `on-drag` dismissal reacted to programmatic scrolling. Numeric ARIA values are now explicit and drag-to-dismiss applies only to native platforms. These checks do not establish native Dynamic Type, VoiceOver/TalkBack or soft-keyboard behavior.
+
+## Dependency audit
+
+2026-09-26: **17 findings: 16 moderate, one high, zero critical**, unchanged runtime dependency set. The remaining high `image-size` vulnerability is in Metro's asset pipeline (including GHSA-5p2g-fcmc-qvqq / GHSA-w3rx-r6r6-pgpr). The older Metro filename/default-export API prevents an unreviewed major override. A compatible SDK/Metro update or reviewed backport with build validation is still required; the lack of image uploads does not resolve it.
 
 ## Required before production distribution
 
-- Clinician/pharmacy approval of each clinical change and independent expected-value fixtures.
-- Install on supported iPhone/iPad/Android devices; test offline cold startup, deep links, background/resume/kill, low storage, migration and export/import.
-- VoiceOver/TalkBack focus and announcements; maximum Dynamic Type, light/dark contrast and landscape/tablet layout.
-- Crisis progress and wall-clock timers across backgrounding, time changes and new events; no reliance on app timers as clinical alarms.
-- Inspect the final signed native binary for permissions, linked SDKs, network activity and OS backup behavior. AsyncStorage is unencrypted.
-- Verify all current source URLs and adopted local algorithm versions. External links require connectivity; retain full approved emergency algorithms in the workplace.
-- Assess multi-tab/process writes if web becomes a supported deployment; this build serializes within one app process only.
+- Authorized clinician/pharmacist review and independent, version-specific acceptance fixtures for each clinical area; source/version/local-algorithm adoption checks.
+- Install signed builds on supported iPhone/iPad/Android devices: cold offline launch, deep links, migration, export/import, low storage, process kill/background/resume and clock changes.
+- VoiceOver/TalkBack, maximum Dynamic Type, soft keyboard, contrast, tablet/landscape and performance checks on devices.
+- Verify crisis elapsed time/progress lifecycle; app timers are not clinical alarms.
+- Inspect actual native permissions, linked SDKs, network and OS backups. AsyncStorage is unencrypted; native share-text export has no native file-import equivalent.
+- Resolve dependency findings; assess multi-process/tab writes if web is supported (serialization is within one app process).

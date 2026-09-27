@@ -45,3 +45,11 @@ Official pages accessed 2026-09-26:
 - [ASRA fifth edition](https://rapm.bmj.com/content/early/2025/09/16/rapm-2024-105766): guideline scope and low/high-dose context inform the scenario model. Reconciliation is not clinical approval.
 
 Deferred product roadmap: (P0) named clinician/pharmacist acceptance and pediatric/device review; (P0) signed-device/accessibility/offline/background tests; (P1) restore reviewed historical drug monographs and validated scores; (P1) transient cross-tool patient snapshot with visible timestamps and opt-in transfer; (P2) regional technique/disease primers with rights; (P3) widgets/Shortcuts/Watch after native lifecycle testing. Cloud sync, PHI and AI treatment recommendations require a separate design and authorization.
+
+## Final disposition
+
+The above restoration decisions are implemented in this branch: semantic dashboard/discovery, rich drug section schema and representative propofol reconciliation, event-specific anticoagulation checklist, labs/ABG, saved pediatric setup, categorized room progress, case visualization and progressive entry, and distinctive crisis workflows. PR #4 arithmetic, routing, source registry, local integrity and recovery remain intact. `HISTORICAL_DRUGS.md` accounts for each of 67 PR #1 drug entries; unsupported historical values are not silently reinstated.
+
+Explicit deferrals: 44 complete historical monographs and missing rich facts on 22 current drugs; independent clinical fixtures/approval; pediatric device/dose/vital ranges; antithrombotic numerical timing; additional LA products; MAC/PONV/antibiotic/opioid numerical content; shared patient snapshot; native blur and haptics; signed-device QA and dependency remediation. The corresponding modules retain useful navigation/context or pending-review structure. No App Store readiness or clinical approval is claimed.
+
+Priority order remains P0 clinical approval + device/accessibility/offline/lifecycle verification + dependency remediation, P1 reviewed content breadth and opt-in transient patient context, P2 rights-cleared regional/procedure depth, then P3 native extensions. No additional cloud/PHI/AI scope is authorized by this refurbishment.
