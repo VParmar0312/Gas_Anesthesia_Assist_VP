@@ -46,6 +46,16 @@ function SettingsForm() {
         onChange={(v) => update("theme", v)}
       />
       <Choice
+        label="Contrast"
+        options={["standard", "increased"]}
+        value={p.contrast ?? "standard"}
+        onChange={(v) => update("contrast", v)}
+      />
+      <Txt muted size={13}>
+        Clinical surfaces stay opaque. Controls use static feedback; screen
+        transitions respect reduced motion.
+      </Txt>
+      <Choice
         label="Home workspace"
         options={["resident", "attending"]}
         value={p.role}

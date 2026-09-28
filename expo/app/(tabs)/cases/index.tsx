@@ -1,3 +1,4 @@
+import { Progress, Panel } from "../../../components/ui/clinical";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import {
@@ -9,6 +10,7 @@ import {
   AsyncButton,
   Notice,
   Field,
+  Choice,
   CitationPanel,
   Accordion,
 } from "../../../components/ui";
@@ -20,8 +22,18 @@ export default function Cases() {
   const [query, setQuery] = useState(""),
     [pending, setPending] = useState(""),
     [deleted, setDeleted] = useState<CaseRecord | null>(null);
+  const [filter, setFilter] = useState("all");
   const requirements = deriveRequirements(data);
   const filtered = data
+    .filter(
+      (c) =>
+        filter === "all" ||
+        (filter === "emergency"
+          ? c.emergency
+          : filter === "imported"
+            ? c.legacy
+            : c.techniques.includes(filter)),
+    )
     .filter((c) =>
       `${c.month} ${c.procedure} ${c.techniques.join(" ")}`
         .toLowerCase()
@@ -40,6 +52,18 @@ export default function Cases() {
         disabled={!loaded || !!error}
         onPress={() => router.push("/(tabs)/cases/new-case")}
       />
+      <Panel
+        title={`${loaded && !error ? data.length : "—"} recorded cases`}
+        subtitle="Personal experience · not an official program log"
+        tone="green"
+        icon="progress"
+      >
+        <Button
+          title="Export, import & backups"
+          subtle
+          onPress={() => router.push("/about")}
+        />
+      </Panel>
       <Notice>
         US ACGME minimum experiences, effective July 2026. Program verification
         is required. This is not the official ACGME log or a competency score.
@@ -50,10 +74,12 @@ export default function Cases() {
       <Accordion title="Experience progress & requirements">
         {requirements.map((r) => (
           <Card key={r.id}>
-            <Txt bold>{r.title}</Txt>
-            <Txt>
-              {r.completed} / {r.minimum}
-            </Txt>
+            <Progress
+              label={r.title}
+              value={r.completed}
+              total={r.minimum}
+              tone="purple"
+            />
           </Card>
         ))}
         <Txt muted>
@@ -74,6 +100,21 @@ export default function Cases() {
         label="Filter by month, procedure or technique"
         value={query}
         onChange={setQuery}
+      />
+      <Choice
+        label="History filter"
+        value={filter}
+        onChange={setFilter}
+        options={[
+          "all",
+          "general",
+          "sedation",
+          "spinal",
+          "epidural",
+          "block",
+          "emergency",
+          "imported",
+        ]}
       />
       {deleted && (
         <Card>

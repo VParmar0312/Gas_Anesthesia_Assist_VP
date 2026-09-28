@@ -1,0 +1,15 @@
+{
+  "report": [
+    "Home → typo search → propofol; structured sections; favorite survives navigation/reload.",
+    "Infusion: empty form rejects; 70 kg, 0.1 mcg/kg/min, 16 mcg/mL → 26.25 mL/h; edit clears result; reset clears inputs.",
+    "ABG: explicit gas and selected Winter model → 24–28 mmHg; input edit removes results; reset clears state.",
+    "Anticoagulation: complete drug/event scenario stays timing-free; changing event invalidates prior summary and review.",
+    "Pediatric: zero months and 3.2 kg persist with checks; changed context clears checks; cancel/reset behave correctly; no device or drug recommendations.",
+    "Room checklist resumes, canceled reset preserves checks, confirmed new session clears checks.",
+    "Crisis: confirmed start, saved action progress and elapsed-time disclaimer survive reload; canceled new event preserves state.",
+    "Case log: zero-month entry and two distinct blocks derive accurate credits; edit/delete/undo; CSV formula escaped; JSON duplicate merge and conflicting-ID rejection verified.",
+    "Bundled reference navigation and alias search work after network is disabled in an already-loaded web app; no offline reload claim.",
+    "Legacy migration: zero-month age preserved, review flag set, original storage retained."
+  ],
+  "errors": []
+}

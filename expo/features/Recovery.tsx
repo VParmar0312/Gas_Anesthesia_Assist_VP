@@ -5,6 +5,8 @@ import {
   preferencesStore,
   checklistStore,
   crisisStore,
+  pediatricStore,
+  searchStore,
 } from "../services/data";
 export default function Recovery() {
   const [pending, setPending] = useState<{
@@ -25,6 +27,8 @@ export default function Recovery() {
         { name: "preferences", store: preferencesStore },
         { name: "preparation session", store: checklistStore },
         { name: "crisis progress", store: crisisStore },
+        { name: "pediatric preparation", store: pediatricStore },
+        { name: "recent searches", store: searchStore },
       ].map(({ name, store }) => (
         <React.Fragment key={name}>
           <Button

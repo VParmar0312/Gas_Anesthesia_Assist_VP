@@ -15,25 +15,12 @@ import {
   preferencesStore,
   useStore,
 } from "../../../services/data";
-const items = [
-  [
-    "machine",
-    "Machine checkout completed according to manufacturer and local requirements",
-  ],
-  ["suction", "Suction tested and immediately available"],
-  ["monitors", "Monitoring equipment checked and appropriate to the case"],
-  ["airway", "Primary and backup airway equipment confirmed"],
-  ["iv", "IV access, fluid plan and delivery equipment confirmed"],
-  ["drugs", "Required drugs, concentrations and labels independently checked"],
-  [
-    "special",
-    "Positioning, special equipment and case-specific needs discussed",
-  ],
-  [
-    "emergency",
-    "Emergency medications and rescue resources located and checked",
-  ],
-];
+import {
+  preparationItems,
+  checklistProgress,
+} from "../../../content/preparation";
+import { Panel, Progress } from "../../../components/ui/clinical";
+const items = preparationItems.map((i) => [i.id, i.label]);
 export default function Preparation() {
   const { data: s, loaded, error } = useStore(checklistStore),
     { data: p } = useStore(preferencesStore);
@@ -78,15 +65,45 @@ export default function Preparation() {
           for current preparation.
         </Notice>
       )}
-      {all.map(([id, label]) => (
-        <Check
-          key={id}
-          label={label}
-          checked={s.checked.includes(id)}
-          disabled={!loaded || stale}
-          onPress={() => toggle(id)}
-        />
-      ))}
+      <Progress
+        label="Session checks"
+        value={checklistProgress(s).done}
+        total={all.length}
+      />
+      {[...new Set(preparationItems.map((i) => i.group))].map((group) => {
+        const groupItems = preparationItems.filter((i) => i.group === group);
+        return (
+          <Panel
+            key={group}
+            title={group}
+            tone={groupItems[0].tone}
+            icon="check"
+          >
+            {groupItems.map(({ id, label }) => (
+              <Check
+                key={id}
+                label={label}
+                checked={s.checked.includes(id)}
+                disabled={!loaded || stale || !!error}
+                onPress={() => toggle(id)}
+              />
+            ))}
+          </Panel>
+        );
+      })}
+      {!!s.custom.length && (
+        <Panel title="Your local checks" tone="green" icon="check">
+          {s.custom.map((label, i) => (
+            <Check
+              key={i}
+              label={label}
+              checked={s.checked.includes(`custom-${i}`)}
+              disabled={!loaded || stale || !!error}
+              onPress={() => toggle(`custom-${i}`)}
+            />
+          ))}
+        </Panel>
+      )}
       <Heading>Local preparation notes</Heading>
       <Txt>
         {p.concentrations ||

@@ -7,6 +7,7 @@ import {
   Choice,
   Check,
   Heading,
+  Accordion,
   AsyncButton,
   Notice,
 } from "../../../components/ui";
@@ -106,34 +107,37 @@ function Form({ existing }: { existing?: CaseRecord }) {
             onChange={(v) => setCounts((c) => ({ ...c, [t]: v }))}
           />
         ))}
-      <Heading>Qualifying experiences</Heading>
-      <Txt muted>
-        Select only what this record represents. Pediatric and technique credits
-        are derived automatically. Each case category is counted once; technique
-        procedure counts are entered separately.
-      </Txt>
-      {creditOptions.map(([id, title]) => (
-        <Check
-          key={id}
-          label={title}
-          checked={credits.includes(id)}
-          onPress={() => toggle(id, credits, setCredits)}
+      <Accordion title="Specialty experiences (optional)">
+        <Txt muted>
+          Select only what this record represents. Pediatric and technique
+          credits are derived automatically. Each case category is counted once;
+          technique procedure counts are entered separately.
+        </Txt>
+        {creditOptions.map(([id, title]) => (
+          <Check
+            key={id}
+            label={title}
+            checked={credits.includes(id)}
+            onPress={() => toggle(id, credits, setCredits)}
+          />
+        ))}
+        {credits.includes("brain") && (
+          <Choice
+            label="Was the intracerebral procedure open?"
+            options={["Yes", "No"]}
+            value={openBrain}
+            onChange={setOpenBrain}
+          />
+        )}
+      </Accordion>
+      <Accordion title="Personal learning note (optional)">
+        <Field
+          label="Optional learning note (no patient details)"
+          value={note}
+          onChange={setNote}
+          multiline
         />
-      ))}
-      {credits.includes("brain") && (
-        <Choice
-          label="Was the intracerebral procedure open?"
-          options={["Yes", "No"]}
-          value={openBrain}
-          onChange={setOpenBrain}
-        />
-      )}
-      <Field
-        label="Optional learning note (no patient details)"
-        value={note}
-        onChange={setNote}
-        multiline
-      />
+      </Accordion>
       <Check
         label="I verified these facts and removed identifying details."
         checked={reviewed}
@@ -218,5 +222,5 @@ export default function NewCase() {
         <Txt>The record may have been removed.</Txt>
       </Screen>
     );
-  return <Form existing={existing} />;
+  return <Form key={id ?? "new"} existing={existing} />;
 }

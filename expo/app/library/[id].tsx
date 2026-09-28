@@ -1,3 +1,8 @@
+import Labs from "../../features/Labs";
+import AcidBase from "../../features/AcidBase";
+import DrugDetail from "../../features/DrugDetail";
+import { drugReferences } from "../../content/drugs";
+import { Panel } from "../../components/ui/clinical";
 import Anticoagulation from "../../features/Anticoagulation";
 import React, { useState } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -24,6 +29,10 @@ export default function Detail() {
   const { data: p } = useStore(preferencesStore);
   const [mode, setMode] = useState(p.mode),
     [checked, setChecked] = useState<string[]>([]);
+  const drug = drugReferences.find((d) => `drug-${d.id}` === id);
+  if (drug) return <DrugDetail key={id} drug={drug} />;
+  if (id === "labs") return <Labs />;
+  if (id === "abg") return <AcidBase />;
   if (id === "anticoag") return <Anticoagulation />;
   if (!entry)
     return (
@@ -53,10 +62,13 @@ export default function Detail() {
         onChange={(v) => setMode(v as "quick" | "learn")}
       />
       {[...entry.quick, ...(mode === "learn" ? entry.learn : [])].map((s) => (
-        <React.Fragment key={s.title}>
-          <Heading>{s.title}</Heading>
+        <Panel
+          key={s.title}
+          title={s.title}
+          tone={entry.kind === "procedure" ? "teal" : "blue"}
+        >
           <Txt>{s.body}</Txt>
-        </React.Fragment>
+        </Panel>
       ))}
       {entry.kind === "procedure" && (
         <>

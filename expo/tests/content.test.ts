@@ -106,9 +106,20 @@ test("clinical release cannot silently treat a draft or expired review as approv
           clinicalReviewer: "Reviewer",
           reviewedAt: "2026-01-01",
           reviewDue: "2027-01-01",
+          acceptanceFixtureIds: ["fixture"],
         },
       ],
       new Date("2026-09-25"),
+      {
+        fixture: {
+          contentId: "x",
+          version: "1",
+          description: "Acceptance",
+          expected: "Verified result",
+          verifiedBy: "Reviewer",
+        },
+      },
+      ["Reviewer"],
     ),
     [],
   );

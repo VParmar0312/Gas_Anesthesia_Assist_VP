@@ -15,6 +15,9 @@ import {
 } from "../../components/ui";
 export default function Tool() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  return <ToolContent key={id} id={id} />;
+}
+function ToolContent({ id }: { id: string }) {
   const tool = toolDefinitions.find((t) => t.id === id);
   const [values, setValues] = useState<Record<string, string>>({}),
     [confirmed, setConfirmed] = useState(false),
@@ -78,6 +81,16 @@ export default function Tool() {
             setResults([]);
             setError((e as Error).message);
           }
+        }}
+      />
+      <Button
+        title="Reset inputs"
+        subtle
+        onPress={() => {
+          setValues({});
+          setResults([]);
+          setError("");
+          setConfirmed(false);
         }}
       />
       {error && <Notice error>{error}</Notice>}

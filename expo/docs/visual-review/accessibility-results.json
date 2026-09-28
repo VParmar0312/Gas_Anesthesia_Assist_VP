@@ -1,0 +1,9 @@
+{
+  "report": [
+    "Expanded propofol detail at 320 px with 150% browser text stress: no document horizontal overflow. This is not native Dynamic Type.",
+    "Expanded content remains reachable after portrait-to-landscape viewport resize.",
+    "Keyboard entry and sequential tab focus between explicitly labeled ABG fields work. Native soft-keyboard avoidance still needs device testing.",
+    "Increased-contrast dark preference renders; reduced-motion media preference supplied during navigation. All native stacks share the reduce-motion listener; device animation behavior unverified."
+  ],
+  "errors": []
+}

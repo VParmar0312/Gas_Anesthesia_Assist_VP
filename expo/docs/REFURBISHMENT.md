@@ -1,0 +1,55 @@
+# Gas refurbishment — audit and implementation plan
+
+Audit date: 2026-09-26. Working branch: `codex/gas-refurbishment` from `cb780e6` (current main). No reset/revert of main. Primary visual baseline `8098273`; broader feature reference `728687e` (PR #1, root-level Expo app); engineering reference `7de1e49` (PR #4). The PR #4 diff changes 86 files. The baseline had already removed parts of PR #1, so restoring only the baseline would miss substantial breadth.
+
+## Parity matrix (before implementation)
+
+| Area | PR #1 | Preferred baseline | PR #4 / initial main | Decision and acceptance |
+|---|---|---|---|---|
+| Home | Colored six-tile dashboard; setup rings; case counts; ACGME bars | Same strengths | Plain buttons; role-dependent case access; no setup progress | Restore colored adaptive tiles and session-aware progress; case log always reachable; derive every statistic from valid loaded facts |
+| Navigation | Five tabs, ambiguous route groups | Same; about added | Home/Prepare/Tools/Library/Crisis; canonical and legacy links | Keep routes; restrained layered chrome with solid native fallback; no glass over clinical text |
+| Drug browsing | Category grouping/colors; expandable dose, mechanism, onset, duration, pediatric, contraindication, interaction, notes | 23 drugs, dose/onset/duration/notes only; lost extra agents and rich fields | 23 source-linked entries; dose/scope/caution paragraphs; all drafts | Restore rich section schema and category identity. Deep propofol reconciliation as representative. Other unsupported fields explicitly pending; preserve all 23 current reconciliations |
+| Additional drugs | Sedatives, opioids, NMBs, vasoactives, antiarrhythmics, antiemetics, hemostatics, analgesics, pulmonary agents | Removed | Removed | Inventory each historical drug in companion audit; searchable review queue with no historical dosing outputs |
+| Anticoagulation | 15 rows incl. edoxaban/fondaparinux, generic hold/restart/labs/bridging | 13 generic rows | Free-text scenario checklist; timing withheld | Drug-specific selector and class, dose/indication, renal, last administration, technique and separate placement/catheter/restart/labs/bridging panels. Numeric rules remain withheld pending independent review |
+| Labs / ABG | Four-step guide and six lab groups; overconfident universal thresholds/treatment statements | Absent | Absent | Restore dedicated searchable labs area; separate ranges, interpretation, formulas, limitations. Explicit-input educational ABG arithmetic with source-linked assumptions; no autonomous diagnosis/treatment |
+| Body size | BMI, IBW, LBW, BSA | BMI/IBW/LBW; default patient sliders | Validated adult BMI/PBW/LBW/BSA with empty inputs | Keep PR #4 arithmetic and scope; do not re-label PBW as a drug dosing weight |
+| Fluids / blood | 4–2–1, NPO deficit/replacement, EBV/ABL | Same | Explicit EBV, no hidden age coefficient; scoped 4–2–1 | Preserve arithmetic; reject automatic NPO replacement. Add explicit coefficient EBV arithmetic only if tested |
+| Local anesthetic | Seven agents and generic mg/kg maxima | Five agents | Product-scoped capped lidocaine only | Keep lidocaine; list other products as pending product-specific review (mixed/continuous/pediatric use not inferred) |
+| MAC / PONV / antibiotic | MAC presets, Apfel factors/risk bands, antimicrobial rows | Removed | Absent | Restore discoverable context/workflow sections; numerical regimens/scores deferred until exact-source reconciliation and fixtures |
+| Drips / units | Drug-specific default concentration/rate presets | Removed | Explicit generic infusion/dilution/concentration/units/hemodynamics/ventilation | Keep all ten tools; restore colorful grouping, reset, visible formulas and scope; no drug presets |
+| Pediatric | Age/weight sliders, ETT/depth/LMA/blade/circuit/fluid, expanded drug/vital information | Equipment/fluid cards; default age five | Empty temporary inputs and checklist; outputs withheld | Persistent explicit preparation session including zero months, clear saved timestamp/reset and stale-session caution. Restore equipment/vitals/drug sections as pending review; no adult defaults or pediatric recommendation |
+| Room setup | MSMAIDS and emergency checklist groups; haptics, rings | Same | Dated session; custom items; confirmation; recovery | Keep session model and IDs; add labeled category color/icons and actual progress |
+| Airway | Mallampati, mouth/neck/thyromental, other observations and scores | Four observations; unsupported aggregate risk and default-negative STOP-Bang | Unanswered states; adult STOP-Bang separate | Keep safe semantics; restore clear observation/score grouping; unsupported scoring remains absent |
+| Crisis | MH/LAST/anaphylaxis/airway/arrest; drug arithmetic | Five protocols | Seven protocols; stored independent events; wall-clock time; exact dantrolene formulation | Preserve all content and event semantics; distinctive urgent navigation and action blocks; elapsed timer never medication alarm |
+| Case log | Fast form; history; mutable minimum counters | Same | Validated case facts/month-age, overlaps, distinct procedures; edit/delete/undo; import/CSV; recovery | Preserve schema and calculations; visual per-category progress and prominent entry/backup access |
+| Search | Local substring search, drug notes | Names/categories | Offline aliases/typos/filter/favorites/recents | Preserve and extend to restored topics/labs; recent searches stored separately; fast one-tap result rows |
+| Preferences / privacy | Dark-only styling; unnecessary dependencies | Disclaimer/support added | Light/dark/system, role, local notes, no remote SDKs; accurate limitations | Keep; semantic contrast-aware palette, accessible states, reduced-motion behavior. No cloud/PHI/remote AI |
+| Governance / verification | Unsourced values, no robust tests | Same | Registry, drafts, release gate, clean install/TS/lint/tests/three exports | Strengthen field-level scope and review fixtures. Release must fail while clinical approval is absent |
+
+## Implementation phases and risks
+
+1. **Audit and design system** — archive historical inventories; semantic tones, navigation, tiles, section panels, progress and responsive surfaces. No new runtime dependency unless justified. Acceptance: readable light/dark surfaces, 48-point targets, no color-only meaning.
+2. **Discovery and workflow restoration** — dashboard, library/drug detail, preparation and resident/crisis surfaces. Keep existing stable IDs and persisted envelopes. Acceptance: propofol in 2–3 deliberate actions; no fabricated/stale dashboard totals.
+3. **Clinical structure and scoped tools** — source-reconciled propofol, anticoagulation event model, labs/ABG arithmetic, pediatric session/schema and source/review gates. Acceptance: unsupported values unavailable; all entered values explicit; zero months persists; no stale calculator output.
+4. **Verification and documentation** — boundaries/migrations/schema tests; type/lint; web/iOS/Android exports; browser workflow and viewport review; screenshots; roadmap and release blockers. Acceptance: report actual results, distinguish browser checks from device testing and clinical approval.
+
+Risk controls: preserve original source data in git; no claims of named approval; no generic neuraxial table; no universal pediatric devices/doses; no copied proprietary algorithms. Review builds remain unsuitable for clinical release until independent clinical acceptance. Native haptics/blur must not require a dependency solely for decoration; accessible solid materials and static reduced-motion behavior are preferred for this pass.
+
+## Product research and decisions
+
+Official pages accessed 2026-09-26:
+- [Vargo Mega App](https://www.vargoanesthesia.com/apps/mega-app/): broad references and weight-centered discovery. Adopt category organization and quick/deep access. Defer broad calculated drug presets until product-specific approval; do not copy its content or UI.
+- [ASRA apps](https://asra.com/guidelines-articles/asra-apps): separate Coags, LAST and Timeout workflows, linking between checklist and anticoagulant review. Adopt cross-links and event-specific panels. Reject interchangeable hold/restart tables.
+- [OpenAnesthesia](https://www.openanesthesia.org/about-oa/): subject-organized educational summaries with editorial ownership. Adopt source transparency and Quick/Learn separation. Link out; do not mirror protected articles.
+- [Stanford Emergency Manual](https://emergencymanual.stanford.edu/downloads/): crisis cognitive aids, reader role, local implementation, explicit distribution restrictions. Adopt readable action sequencing; do not distribute or adapt its protected algorithms.
+- [ASRA fifth edition](https://rapm.bmj.com/content/early/2025/09/16/rapm-2024-105766): guideline scope and low/high-dose context inform the scenario model. Reconciliation is not clinical approval.
+
+Deferred product roadmap: (P0) named clinician/pharmacist acceptance and pediatric/device review; (P0) signed-device/accessibility/offline/background tests; (P1) restore reviewed historical drug monographs and validated scores; (P1) transient cross-tool patient snapshot with visible timestamps and opt-in transfer; (P2) regional technique/disease primers with rights; (P3) widgets/Shortcuts/Watch after native lifecycle testing. Cloud sync, PHI and AI treatment recommendations require a separate design and authorization.
+
+## Final disposition
+
+The above restoration decisions are implemented in this branch: semantic dashboard/discovery, rich drug section schema and representative propofol reconciliation, event-specific anticoagulation checklist, labs/ABG, saved pediatric setup, categorized room progress, case visualization and progressive entry, and distinctive crisis workflows. PR #4 arithmetic, routing, source registry, local integrity and recovery remain intact. `HISTORICAL_DRUGS.md` accounts for each of 67 PR #1 drug entries; unsupported historical values are not silently reinstated.
+
+Explicit deferrals: 44 complete historical monographs and missing rich facts on 22 current drugs; independent clinical fixtures/approval; pediatric device/dose/vital ranges; antithrombotic numerical timing; additional LA products; MAC/PONV/antibiotic/opioid numerical content; shared patient snapshot; native blur and haptics; signed-device QA and dependency remediation. The corresponding modules retain useful navigation/context or pending-review structure. No App Store readiness or clinical approval is claimed.
+
+Priority order remains P0 clinical approval + device/accessibility/offline/lifecycle verification + dependency remediation, P1 reviewed content breadth and opt-in transient patient context, P2 rights-cleared regional/procedure depth, then P3 native extensions. No additional cloud/PHI/AI scope is authorized by this refurbishment.

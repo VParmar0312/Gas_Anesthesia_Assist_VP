@@ -1,3 +1,4 @@
+import { Badge, Panel } from "../../../components/ui/clinical";
 import React, { useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { useLocalSearchParams } from "expo-router";
@@ -43,6 +44,7 @@ export default function Protocol() {
     { data: p } = useStore(preferencesStore);
   const [now, setNow] = useState(Date.now()),
     [reset, setReset] = useState(false),
+    [starting, setStarting] = useState(false),
     [ending, setEnding] = useState(false),
     [failure, setFailure] = useState(""),
     [weight, setWeight] = useState(""),
@@ -85,6 +87,7 @@ export default function Protocol() {
   };
   return (
     <Screen title={entry.title} back>
+      <Badge label="CRISIS REFERENCE · CALL FOR HELP" tone="rose" />
       <Notice>{guide.scope}</Notice>
       {p.emergencyContact && (
         <Txt bold>Local contact: {p.emergencyContact}</Txt>
@@ -92,10 +95,12 @@ export default function Protocol() {
       {(error || failure) && <Notice error>{error || failure}</Notice>}
       <Heading>Actions</Heading>
       {guide.actions.map((a, i) => (
-        <Card key={a.id}>
-          <Txt size={22} bold>
-            {i + 1}. {a.title}
-          </Txt>
+        <Panel
+          key={a.id}
+          title={`${i + 1}. ${a.title}`}
+          tone="rose"
+          icon="crisis"
+        >
           <Txt>{a.detail}</Txt>
           {session && (
             <Check
@@ -104,7 +109,7 @@ export default function Protocol() {
               onPress={() => toggle(a.id)}
             />
           )}
-        </Card>
+        </Panel>
       ))}
       {guide.cautions.map((c) => (
         <Notice key={c}>{c}</Notice>
@@ -169,24 +174,40 @@ export default function Protocol() {
               Read actions immediately. Starting an event enables saved
               checkmarks and elapsed time.
             </Txt>
-            <AsyncButton
-              title="Start new event"
-              action={async () => {
-                if (!loaded)
-                  throw Error(
-                    "Storage still loading. Actions remain available above.",
-                  );
-                await crisisStore.update((v) => [
-                  ...v.filter((s) => s.protocol !== id),
-                  { protocol: id, startedAt: Date.now(), checked: [] },
-                ]);
-                setWeight("");
-                setForm("");
-                setConfirmed(false);
-                setDose(null);
-                setFailure("");
-              }}
-            />
+            {!starting ? (
+              <Button
+                title="Start new event"
+                onPress={() => setStarting(true)}
+              />
+            ) : (
+              <>
+                <Txt>Start a new saved event and elapsed timer?</Txt>
+                <AsyncButton
+                  title="Confirm start event"
+                  action={async () => {
+                    if (!loaded)
+                      throw Error(
+                        "Storage still loading. Actions remain available above.",
+                      );
+                    await crisisStore.update((v) => [
+                      ...v.filter((s) => s.protocol !== id),
+                      { protocol: id, startedAt: Date.now(), checked: [] },
+                    ]);
+                    setWeight("");
+                    setForm("");
+                    setConfirmed(false);
+                    setDose(null);
+                    setFailure("");
+                    setStarting(false);
+                  }}
+                />
+                <Button
+                  title="Read without starting"
+                  subtle
+                  onPress={() => setStarting(false)}
+                />
+              </>
+            )}
           </>
         )}
         {reset && (
